@@ -25,6 +25,8 @@
 
 namespace local_sap;
 
+use stdClass;
+
 /**
  * Class for communicating between sapdb and output files.
  *
@@ -74,10 +76,51 @@ class sapdb_controller {
         return null;
     }
 
+    /**
+     * This Function gives all courses for a teacherID within the defined time.
+     * @param $pid int The Id of the teacher
+     * @return array
+     * @throws \dml_exception
+     */
     function get_veranstid_by_teacher_sap($pid) {
         $courses = $this->db->get_records_sql("SELECT * FROM " . SAP_VER_PO . " WHERE sapid =" . $pid . "and (CURRENT_DATE - CAST(begda_o AS date)) < " .
             get_config('local_sap', 'max_import_age') . " order by peryr, perid");
-
         return $courses;
     }
+
+    function get_courses_by_veranstids_sap($veranstids) {
+        if (empty($veranstids)) {
+            return array();
+        }
+        $veranstids_string = implode(',', $veranstids);
+
+        $courses = $this->db->get_records_sql("
+            SELECT v.objid, v.stext, d.peryr, d.perid, d.category, v.tabnr, v.tabseqnr, v.tline
+            FROM " . SAP_VERANST . " as v JOIN " . SAP_VERANST_DETAILS . " as d on v.objid = d.objid
+            WHERE v.objid in (" . $veranstids_string . ") 
+                AND " . "(CURRENT_DATE - CAST(v.begda AS date)) < " . get_config('local_sap', 'max_import_age') .
+            " ORDER BY v.begda,v.tline;");
+
+        foreach ($courses as $course) {
+            $result = new stdClass();
+            $result->veranstid = $course->objid;
+            $result->peryr = $course->peryr;
+            $result->perid = $course->perid;
+            $result->semester = $course->peryr . $course->perid[-1];
+            if($course->perid[-1] === "1"){
+                $semester = "SoSe";
+            } else if($course->perid[-1] === "2") {
+                $semester = "WiSe";
+            }
+            $result->semestertxt = $semester . " " . $course->peryr;
+            $result->veranstaltungsart = $course->category;
+            $result->titel = $course->stext; //get_klvl_title($course->objid, $course->peryr, $course->perid, SAP_VERANST);
+            //$result->urlveranst = $course->urlveranst; TODO
+            $result_list[$course->objid] = $result;
+        }
+
+        return $result_list;
+    }
+
+
 }
