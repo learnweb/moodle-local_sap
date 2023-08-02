@@ -26,3 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'SAP Course Application';
+$string['sap_course_teacher'] = 'The course exists on the SAP platform and you are registered as a teacher for that course';
+$string['sap_course_authorized'] = 'The course exists on the SAP platform and you are authorized to create this course on behalf of  a registered teacher';
+$string['sap_course_none'] = 'None of the above apply and you are authorized to create this course in the Learnweb';
+$string['submitbutton'] = 'Submit';
+$string['mustselectone'] = 'Unknown parameter, please select exactly 1 option';
