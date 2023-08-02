@@ -66,7 +66,7 @@ class sapdb_controller {
      * @param $username string the teachers username
      * @return $sapid the teachers sapid (personen-id)
      */
-    function get_teachers_pid_sap($username) {
+    function get_teachers_pid($username) {
         // TO CHECK: use get_record instead of get_record_sql.
         $teacherrecord = $this->db->get_record_sql("SELECT sapid FROM " . SAP_PERSONAL_LOGIN
             . " WHERE login= '" . strtoupper($username) . "'");
@@ -82,13 +82,30 @@ class sapdb_controller {
      * @return array
      * @throws \dml_exception
      */
-    function get_veranstid_by_teacher_sap($pid) {
+    function get_veranstids_by_teacher($pid) {
         $courses = $this->db->get_records_sql("SELECT * FROM " . SAP_VER_PO . " WHERE sapid =" . $pid . "and (CURRENT_DATE - CAST(begda_o AS date)) < " .
             get_config('local_sap', 'max_import_age') . " order by peryr, perid");
         return $courses;
     }
 
-    function get_courses_by_veranstids_sap($veranstids) {
+    /**
+     * Gets one course by its veranstid.
+     * @param $veranstid int
+     * @return mixed
+     */
+    function get_course_by_veranstid($veranstid) {
+        $result = get_courses_by_veranstids(array($veranstid
+        ));
+        return $result[$veranstid];
+    }
+
+    /**
+     * Gets multiple courses by an array of veranstid.
+     * @param $veranstids array
+     * @return array of stdClasses
+     * @throws \dml_exception
+     */
+    function get_courses_by_veranstids($veranstids) {
         if (empty($veranstids)) {
             return array();
         }
@@ -114,13 +131,49 @@ class sapdb_controller {
             }
             $result->semestertxt = $semester . " " . $course->peryr;
             $result->veranstaltungsart = $course->category;
+            // TODO klvl title
             $result->titel = $course->stext; //get_klvl_title($course->objid, $course->peryr, $course->perid, SAP_VERANST);
             //$result->urlveranst = $course->urlveranst; TODO
+            // might override object with same objid.
             $result_list[$course->objid] = $result;
         }
 
         return $result_list;
     }
 
+    /**
+     * Appends @uni-muenster to the username
+     * @param $username
+     * @return string
+     */
+    function username_to_mail($username) {
+        return $username . "@uni-muenster.de";
+    }
 
+
+    /**
+     * TODO.
+     * @return string
+     */
+    function gen_url() {
+        return "";
+    }
+
+    function get_teachers_course_list($username, $longinfo = false) {
+        $courselist = array();
+        $pid = $this->get_teachers_pid($username);
+        if (empty($pid)) {
+            return $courselist;
+        }
+        $veranst = $this->get_veranstids_by_teacher($pid);
+        foreach ($veranst as $course) {
+            $result = new stdClass();
+            $url = $this->gen_url($course);
+            $result->veranstid = $course->objid;
+            $result->info = $course->stext; //get_klvl_title($course->objid, $course->peryr, $course->perid, SAP_VERANST) . " (" . ($course->perid == 1? "SoSe " : "WiSe ") . $course->peryr . ",<a target='_blank' href=" . $url . "> Link - " . $course->objid . "</a>" . ")";
+            // TODO URL und Optional - beschreibung, früher shorttext oder so.
+            $courselist[$course->short] = $result;
+        }
+        return $courselist;
+    }
 }
