@@ -74,4 +74,9 @@ class sapdb_controller {
         return null;
     }
 
+    function get_veranstid_by_teacher_sap($pid) {
+        $courses = $this->db->get_records(SAP_VER_PO, array('sapid' => $pid), 'peryr, perid');
+
+        return $courses;
+    }
 }
