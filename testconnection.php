@@ -6,5 +6,5 @@ require_admin();
 
 $controller = new \local_sap\sapdb_controller();
 
-echo json_encode($controller->test_connection());
+echo json_encode($controller->get_teachers_pid_sap());
 
