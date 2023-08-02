@@ -18,7 +18,6 @@
  * Plugin administration pages are defined here.
  *
  * @package     local_sap
- * @category    admin
  * @copyright   2023 Uni Münster 
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -70,7 +69,9 @@ if ($hassiteconfig) {
 
         $settings->add(new admin_setting_configcheckbox('local_sap/remote_creation',
             get_string('remote_creation', 'local_sap'),
-            get_string('remote_creation_description', 'local_sap'), 1));
+            get_string('remote_creation_desc', 'local_sap'), 1));
 
     }
+
+    $ADMIN->add('localplugins', $settings);
 }
