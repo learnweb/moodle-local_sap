@@ -83,7 +83,7 @@ class sapdb_controller {
      * @throws \dml_exception
      */
     function get_veranstids_by_teacher($pid) {
-        $courses = $this->db->get_records_sql("SELECT DISTINCT (objid), * FROM " . SAP_VER_PO . " WHERE sapid =" . $pid . " AND (CURRENT_DATE - CAST(begda_o AS date)) < " .
+        $courses = $this->db->get_records_sql("SELECT DISTINCT ON (objid), * FROM " . SAP_VER_PO . " WHERE sapid =" . $pid . " AND (CURRENT_DATE - CAST(begda_o AS date)) < " .
             get_config('local_sap', 'max_import_age') . " ORDER BY peryr, perid");
         return $courses;
     }
