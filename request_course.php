@@ -14,8 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+use \local_sap\course_form;
+require_once(__DIR__ . '/../../config.php');
 // Site parameter.
-$option = requiered_param('opt', PARAM_INT);
-$courseid = optional_param('coursenumber', PARAM_TEXT);
+$courseid = required_param('courseid', PARAM_TEXT);
 
 
+require_login();
+$context = context_system::instance();
+$PAGE->set_context($context);
+$PAGE->set_url(new \moodle_url('/local/sap/request_course.php', array('courseid' => $courseid)));
+
+$courseform = new course_form(null, array('sapid' => $courseid));
+
+
+echo $OUTPUT->header();
+echo $OUTPUT->heading('');
+$courseform->display();
+echo $OUTPUT->footer();

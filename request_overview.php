@@ -14,26 +14,31 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-use local\sap\classes\request_form;
+use \local_sap\request_form;
 
-require_once(dirname(__FILE__) .  '. /../../config.php');
-
-require_once($CFG->dirroot . '/local/sap/classes/request_form.php');
-
+require_once(__DIR__ . '/../../config.php');
 
 require_login();
 $context = context_system::instance();
-
 $PAGE->set_context($context);
 $PAGE->set_url('/local/sap/request_overview.php');
 
-
-$requestform = new \request_form();
+$requestform = new request_form();
 if ($fromform = $requestform->get_data()) {
-    //$newurl = new \moodle_url('local/sap/request_course.php&opt=' . $fromform->);
-    //redirect($newurl);
+    $newurl = $PAGE->url;
+    switch ($fromform->request_option) {
+        case request_form::OPTION_SAP_COURSE_TEACHER:
+            $newurl = new \moodle_url('/local/sap/request_course.php', array('courseid' =>  $fromform->courses));
+            break;
+        case request_form::OPTION_SAP_COURSE_AUTHORIZED:
+            // TODO.
+            break;
+        case request_form::OPTION_SAP_COURSE_NONE:
+            // TODO.
+            break;
+    }
+    redirect($newurl);
 }
-
 echo $OUTPUT->header();
 echo $OUTPUT->heading('');
 $requestform->display();

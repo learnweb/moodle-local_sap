@@ -14,74 +14,51 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace local_sap;
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/formslib.php');
-class request_form extends moodleform {
+class request_form extends \moodleform {
     public $mform;
     public $option;
     public $courseid;
     public $courses;
+    const OPTION_SAP_COURSE_TEACHER = 1;
+    const OPTION_SAP_COURSE_AUTHORIZED = 2;
+    const OPTION_SAP_COURSE_NONE = 3;
     function definition() {
         global $USER, $CFG, $DB;
 
         $this->mform = $this->_form;
-        $this->mform->addElement('advcheckbox', 'sap_course_teacher', get_string('sap_course_teacher', 'local_sap'));
+        $options = array();
+        $this->mform->addElement('radio', 'request_option', '',
+                                get_string('sap_course_teacher', 'local_sap'), self::OPTION_SAP_COURSE_TEACHER);
         // Checkbox for sap_teacher.
         $this->show_courses();
 
-        $this->mform->addElement('advcheckbox', 'sap_course_authorized', get_string('sap_course_authorized', 'local_sap'));
+        $this->mform->addElement('radio', 'request_option', '',
+                                get_string('sap_course_authorized', 'local_sap'), self::OPTION_SAP_COURSE_AUTHORIZED);
 
 
-        $this->mform->addElement('advcheckbox', 'sap_course_none', get_string('sap_course_none', 'local_sap'));
+        $this->mform->addElement('radio', 'request_option', '',
+                                get_string('sap_course_none', 'local_sap'), self::OPTION_SAP_COURSE_NONE);
 
-        $this->mform->addElement('submit', 'submitbutton', get_string('submitbutton', 'local_sap'),);
-
+        $this->mform->addElement('submit', 'submitbutton',
+                                get_string('submitbutton', 'local_sap'));
+        $this->mform->setDefault('request_option', 1);
 
     }
 
-    function validation($data, $files) {
-        $errors = parent::validation($data, $files);
-
-        $count = 0;
-        $count += $this->get_submitted_data('sap_course_teacher');
-        $count += $this->get_submitted_data('sap_course_authorized');
-        $count += $this->get_submitted_data('sap_course_none');
-        var_dump($this->get_submitted_data());
-        if ( $count != 1) {
-            $errors['shortname'] = get_string('mustselectone', 'local_sap');
-        }
-
-        return $errors;
-    }
-
-    function get_option() {
-        if ($this->get_submitted_data('sap_course_teacher') == 1) {
-            $this->option = 0;
-        } else if($this->get_submitted_data('sap_course_authorized') == 1) {
-            $this->option=1;
-        } else if ($this->get_submitted_data('sap_course_none') == 1) {
-            $this->option = 2;
-        }
-        return $this->option;
-    }
-
-    function get_courseid() {
-        foreach ($this->courses as $course) {
-
-        }
-        return $this->courseid;
-}
     function show_courses() {
         $this->courses = array();
-        $this->courses[] = $this->mform->createElement('radio', 'courses', '', 'course1: einführung in die informatik',0);
+        $this->courses[] = $this->mform->createElement('radio', 'courses', '', 'course1: einführung in die informatik', 31);
 
-        $this->courses[] = $this->mform->createElement('radio', 'courses', '', 'course2: einführung in die moodletechnik',0);
+        $this->courses[] = $this->mform->createElement('radio', 'courses', '', 'course2: einführung in die moodletechnik',45);
 
-        $this->courses[] = $this->mform->createElement('radio', 'courses', '', 'course3: einführung in die mensapreise',0);
+        $this->courses[] = $this->mform->createElement('radio', 'courses', '', 'course3: einführung in die mensapreise',46);
 
         $this->mform->addGroup($this->courses, 'sap_courses', '', '<br/>', false);
 
-        $this->mform->hideif('sap_courses', 'sap_course_teacher');
+        $this->mform->hideif('sap_courses', 'sap_course', 'neq', 1);
     }
 }
