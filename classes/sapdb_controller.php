@@ -58,13 +58,6 @@ class sapdb_controller {
         $this->db = \local_sap\sapdb::get();
     }
 
-    public function test_connection () {
-
-        // return $db->get_records_sql("SELECT * FROM " . SAP_PERSONAL . " LIMIT 50", []);
-        return $this->db->get_records(SAP_PERSONAL,null,"", "vorname, nachname" ,0, 50);
-
-    }
-
     /**
      * get_teachers_pid returns the pid (personen-id) connected to a specific username.
      *
@@ -72,12 +65,13 @@ class sapdb_controller {
      * @return $sapid the teachers sapid (personen-id)
      */
     function get_teachers_pid_sap($username) {
-        $teacherrecord = $this->db->get_record(SAP_PERSONAL_LOGIN, array('login' => "'" . strtoupper($username) . "'"), 'sapid');
+        // TO CHECK: use get_record instead of get_record_sql.
+        $teacherrecord = $this->db->get_record_sql("SELECT sapid FROM " . SAP_PERSONAL_LOGIN
+            . " WHERE login= '" . strtoupper($username) . "'");
         if (!empty($teacherrecord)) {
             return $teacherrecord->sapid;
         }
         return null;
     }
-
 
 }
