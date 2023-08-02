@@ -1,6 +1,6 @@
 <?php
 
-require_once(dirname(__FILE__) . '/../../config.php');
+require_once(__DIR__ . '/../../config.php');
 
 require_admin();
 
@@ -15,13 +15,9 @@ define("SAP_PERSONAL",          "public.ovv_lehrende");
 define("SAP_PERSONAL_LOGIN",    "public.ovv_lehr_email");
 define("SAP_VER_PO",      	"public.ovv_klvl_po");
 
-$pgthing = new \local_sap\pg_lite();
-$pgthing->connect();
+$db = \local_sap\sapdb::get();
 
-$result = pg_query($pgthing->connection,
-    "SELECT p.vorname, p.nachname, l.login, p.sapid FROM " . SAP_PERSONAL . " as p JOIN " .
-    SAP_PERSONAL_LOGIN. " as l on p.sapid = l.sapid LIMIT 50");
+$result = $db->get_records(SAP_PERSONAL, [], '', 'vorname, nachname', 0, 50);
 
-echo json_encode(pg_fetch_all($result));
+echo json_encode($result);
 
-$pgthing->dispose();

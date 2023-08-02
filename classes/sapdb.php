@@ -16,7 +16,7 @@
 
 
 /**
- * Class for connecting to SAP.
+ * Class for connecting to SAP with Moodle API.
  *
  * @package     local_sap
  * @copyright   2023 Uni Münster
@@ -26,35 +26,32 @@
 namespace local_sap;
 
 /**
- * Class for connecting to SAP.
+ * Class for connecting to SAP with Moodle API.
  *
  * @package     local_sap
  * @copyright   2023 Uni Münster
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class pg_lite {
 
-    public $connection = null;
+class sapdb {
 
-    public function connect() {
-
-        $config = "host='" . get_config('local_sap', 'dbhost') . "' port ='" .
-            get_config('local_sap', 'dbport') . "' user='" . get_config('local_sap', 'dbuser') .
-            "' password='" . get_config('local_sap', 'dbpass') . "' dbname='" .
-            get_config('local_sap', 'dbname') . "'";
-        ob_start();
-        $this->connection = pg_connect($config, PGSQL_CONNECT_FORCE_NEW);
-        $dberr = ob_get_contents();
-        ob_end_clean();
-        echo $dberr;
-        return ((pg_connection_status($this->connection) === false) || (pg_connection_status($this->connection) === PGSQL_CONNECTION_BAD))?$dberr:true;
+    private static $instance;
+    public static function get() {
+        if (!self::$instance) {
+            self::$instance = \moodle_database::get_driver_instance('pgsql', 'native');
+            self::$instance->connect(
+                get_config('local_sap', 'dbhost'),
+                get_config('local_sap', 'dbuser'),
+                get_config('local_sap', 'dbpass'),
+                get_config('local_sap', 'dbname'),
+                false,
+            );
+        }
+        return self::$instance;
     }
 
-    public function dispose() {
-        if ($this->connection) {
-            pg_close($this->connection);
-            $this->connection = null;
-        }
+    public static function destroy() {
+        self::$instance->close();
     }
 
 }
