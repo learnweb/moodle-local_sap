@@ -17,7 +17,7 @@ define("SAP_VER_PO",      	"public.ovv_klvl_po");
 
 $db = \local_sap\sapdb::get();
 
-$result = $db->get_records(SAP_PERSONAL, [], '', 'vorname, nachname', 0, 50);
+$result = $db->get_records_sql("SELECT * FROM " . SAP_PERSONAL . " LIMIT 50", []);
 
 echo json_encode($result);
 

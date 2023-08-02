@@ -38,13 +38,13 @@ class sapdb {
     private static $instance;
     public static function get() {
         if (!self::$instance) {
-            self::$instance = \moodle_database::get_driver_instance('pgsql', 'native');
+            self::$instance = \moodle_database::get_driver_instance('pgsql', 'native', true);
             self::$instance->connect(
                 get_config('local_sap', 'dbhost'),
                 get_config('local_sap', 'dbuser'),
                 get_config('local_sap', 'dbpass'),
                 get_config('local_sap', 'dbname'),
-                false,
+                false
             );
         }
         return self::$instance;
