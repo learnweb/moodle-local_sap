@@ -83,8 +83,8 @@ class sapdb_controller {
      * @throws \dml_exception
      */
     function get_veranstids_by_teacher($pid) {
-        $courses = $this->db->get_records_sql("SELECT * FROM " . SAP_VER_PO . " WHERE sapid =" . $pid . "and (CURRENT_DATE - CAST(begda_o AS date)) < " .
-            get_config('local_sap', 'max_import_age') . " GROUP BY objid ORDER BY peryr, perid");
+        $courses = $this->db->get_records_sql("SELECT DISTINCT (objid), * FROM " . SAP_VER_PO . " WHERE sapid =" . $pid . " AND (CURRENT_DATE - CAST(begda_o AS date)) < " .
+            get_config('local_sap', 'max_import_age') . " ORDER BY peryr, perid");
         return $courses;
     }
 
@@ -115,7 +115,7 @@ class sapdb_controller {
             SELECT v.objid, v.stext, d.peryr, d.perid, d.category, v.tabnr, v.tabseqnr, v.tline
             FROM " . SAP_VERANST . " as v JOIN " . SAP_VERANST_DETAILS . " as d on v.objid = d.objid
             WHERE v.objid in (" . $veranstids_string . ") 
-                AND " . "(CURRENT_DATE - CAST(v.begda AS date)) < " . get_config('local_sap', 'max_import_age') .
+                 AND " . "(CURRENT_DATE - CAST(v.begda AS date)) < " . get_config('local_sap', 'max_import_age') .
             " ORDER BY v.begda,v.tline;");
 
         foreach ($courses as $course) {
