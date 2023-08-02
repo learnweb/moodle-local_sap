@@ -14,34 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-use \local_sap\request_form;
-
 require_once(__DIR__ . '/../../config.php');
 
 require_login();
+$username = required_param('username', PARAM_ALPHANUMEXT);
 $context = context_system::instance();
 $PAGE->set_context($context);
-$PAGE->set_url('/local/sap/request_overview.php');
+$PAGE->set_url('/local/sap/request_remote.php', ['username' => $username]);
 
-$requestform = new request_form();
-if ($fromform = $requestform->get_data()) {
-    $newurl = $PAGE->url;
-    var_dump($fromform);
-    switch ($fromform->request_option) {
-        case request_form::OPTION_SAP_COURSE_TEACHER:
-            $newurl = new \moodle_url('/local/sap/request_course.php', array('courseid' =>  $fromform->courses));
-            break;
-        case request_form::OPTION_SAP_COURSE_AUTHORIZED:
-            $newurl = new \moodle_url('/local/sap/request_remote.php', array('username' => $fromform->username_group['create_for_username']));
-            break;
-        case request_form::OPTION_SAP_COURSE_NONE:
-            // TODO.
-            break;
-    }
-    redirect($newurl);
+$requestform = new \local_sap\request_remote_form($PAGE->url);
+if ($requestform->is_cancelled()) {
+    redirect(new moodle_url('/local/sap/request_overview.php'));
+} else if ($data = $requestform->get_data()) {
+    // TODO send mails.
 }
+
 echo $OUTPUT->header();
-echo $OUTPUT->heading('');
+echo $OUTPUT->heading(get_string('list_of_courses_for_teacher', 'local_sap', $username));
 $requestform->display();
 echo $OUTPUT->footer();
 

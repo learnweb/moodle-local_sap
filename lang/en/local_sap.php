@@ -32,6 +32,7 @@ $string['sap_course_none'] = 'None of the above apply and you are authorized to 
 $string['submitbutton'] = 'Submit';
 $string['mustselectone'] = 'Unknown parameter, please select exactly 1 option';
 
+
 // Strings of the course_form.php.
 $string['shortnamehint'] = 'Shortname must contain {$a} at the end';
 $string['config_enrol'] = 'Enrolment';
@@ -42,3 +43,12 @@ $string['config_category_wish'] = 'Category Relocation Wish';
 $string['config_category_wish_help'] = "If you have a wish to get your course moved into a more specific category, please leave a comment here containing your wish-category and path.";
 $string['config_course_semester'] = 'Term';
 $string['shortnameinvalid'] = 'Shortname is invalid (it must contain {$a} at the end)';
+
+$string['info_nocourses'] = 'Please use the standard form to apply for course creation. (<a href="../../course/request.php">&rarr; Link</a>)
+Your request will be processed by the Learnweb Support as soon as possible.';
+$string['create_for_username'] = 'Please enter the username of the authorizing teacher:';
+$string['list_of_courses_for_teacher'] = 'This is the list of courses for user {$a}:';
+
+// Email strings
+$string['remote_request_email_title'] = 'Course Creation Request';
+$string['remote_request_email_content'] = 'The user "{$a->a}" ({$a->userurl}) requested to create the Learnweb-course "{$a->c}" in your name. Please confirm or deny the request on this website: {$a->requesturl}';

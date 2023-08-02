@@ -35,18 +35,26 @@ class request_form extends \moodleform {
                                 get_string('sap_course_teacher', 'local_sap'), self::OPTION_SAP_COURSE_TEACHER);
         // Checkbox for sap_teacher.
         $this->show_courses();
-
         $this->mform->addElement('radio', 'request_option', '',
                                 get_string('sap_course_authorized', 'local_sap'), self::OPTION_SAP_COURSE_AUTHORIZED);
 
+        $this->mform->addGroup([
+                $this->mform->createElement('html', get_string('create_for_username', 'local_sap')),
+                $this->mform->createElement('text', 'create_for_username', '', ''),
+        ], 'username_group');
+        $this->mform->setType('username_group[create_for_username]', PARAM_ALPHANUMEXT);
+        $this->mform->hideIf('username_group', 'request_option', 'neq', self::OPTION_SAP_COURSE_AUTHORIZED);
 
         $this->mform->addElement('radio', 'request_option', '',
                                 get_string('sap_course_none', 'local_sap'), self::OPTION_SAP_COURSE_NONE);
+        $this->mform->setDefault('request_option', self::OPTION_SAP_COURSE_TEACHER);
+
+        $this->mform->addGroup([$this->mform->createElement('static', 'nocoursestext', '', get_string('info_nocourses', 'local_sap'))],
+        'nocoursestextgroup', '');
+        $this->mform->hideIf('nocoursestextgroup', 'request_option', 'neq', self::OPTION_SAP_COURSE_NONE);
 
         $this->mform->addElement('submit', 'submitbutton',
-                                get_string('submitbutton', 'local_sap'));
-        $this->mform->setDefault('request_option', 1);
-
+                get_string('submitbutton', 'local_sap'));
     }
 
     function show_courses() {
@@ -59,6 +67,6 @@ class request_form extends \moodleform {
 
         $this->mform->addGroup($this->courses, 'sap_courses', '', '<br/>', false);
 
-        $this->mform->hideif('sap_courses', 'sap_course', 'neq', 1);
+        $this->mform->hideif('sap_courses', 'request_option', 'neq', self::OPTION_SAP_COURSE_TEACHER);
     }
 }
