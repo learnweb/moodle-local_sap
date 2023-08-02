@@ -84,7 +84,7 @@ class sapdb_controller {
      */
     function get_veranstids_by_teacher($pid) {
         $courses = $this->db->get_records_sql("SELECT * FROM " . SAP_VER_PO . " WHERE sapid =" . $pid . "and (CURRENT_DATE - CAST(begda_o AS date)) < " .
-            get_config('local_sap', 'max_import_age') . " order by peryr, perid");
+            get_config('local_sap', 'max_import_age') . " ORDER BY peryr, perid GROUP BY objid");
         return $courses;
     }
 
