@@ -26,3 +26,21 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'SAP Course Application';
+
+// Strings for settings page.
+// Connection settings.
+$string['heading_connection_settings'] = 'Connection Settings';
+$string['dbhost'] = 'Host';
+$string['dbport'] = 'Port';
+$string['dbname'] = 'Name';
+$string['dbpass'] = 'Pass';
+$string['dbuser'] = 'User';
+
+// Import settings.
+$string['heading_import_settings'] = 'Import Settings';
+$string['max_import_age'] = 'Maximum age of courses that can be imported';
+$string['subcategories'] = 'Allow placement in subcategories';
+$string['defaultcategory'] = 'Default category';
+$string['remote_creation'] = 'Remote course creation';
+$string['remote_creation_desc'] = 'Allow everyone to request courses in the name of a teacher, who than has to confirm';
+
