@@ -67,9 +67,9 @@ class sapdb_controller {
      */
     private function get_teachers_pid(string $username) {
         // TO CHECK: use get_record instead of get_record_sql.
-        $params = array('username' => $username);
+        $params = array('username' => strtoupper($username));
         $teacherrecord = $this->db->get_record_sql("SELECT sapid FROM " . SAP_PERSONAL_LOGIN
-            . " WHERE login= ':username'", $username);
+            . " WHERE login= :username", $params);
         if (!empty($teacherrecord)) {
             return $teacherrecord->sapid;
         }
@@ -87,9 +87,9 @@ class sapdb_controller {
     private function get_veranstids_by_teacher(int $pid): array {
         // TODO: get an unique objectid (by using distinct or group by perhaps).
         $params = array('maximportage' => get_config('local_sap', 'max_import_age'), 'pid' => $pid);
-        return $this->db->get_records_sql("SELECT DISTINCT (objid), * FROM " . SAP_VER_PO .
+        return $this->db->get_records_sql("SELECT DISTINCT on (objid) objid, * FROM " . SAP_VER_PO .
                                             " WHERE sapid = :pid AND (CURRENT_DATE - CAST(begda_o AS date)) < :maximportage
-                                             ORDER BY peryr, perid", $params);
+                                             ORDER BY objid, peryr, perid", $params);
     }
 
     /**
@@ -174,6 +174,7 @@ class sapdb_controller {
     public function get_teachers_course_list(string $username, bool $longinfo = false): array {
         $courselist = array();
         $pid = $this->get_teachers_pid($username);
+
         if (empty($pid)) {
             return $courselist;
         }
@@ -295,7 +296,7 @@ class sapdb_controller {
      */
     public function get_default_summary(stdClass $sapcourse): string {
         $summary = '<p>' . $this->get_klvl_title($sapcourse->veranstid, $sapcourse->peryr, $sapcourse->perid,
-                    SAP_VERANST_KOMMENTAR) . '</p>';
+                    SAP_VERANST_KOMMENTAR) . '</p>'; // TODO why does the table change from VERANST to VERANST_KOMENTAR?
         return $summary . '<p><a href="' . $this->gen_url($sapcourse) . '">Kurs in SAP</a></p>';
     }
 
@@ -352,9 +353,9 @@ class sapdb_controller {
      */
     private function get_klvl_title(int $kid, string $peryr, string $perid, string $table): ?string {
         $params = array('kid' => $kid, 'peryr' => $peryr, 'perid' => $perid);
-        $records = $this->db->get_records_sql("SELECT tabnr, tline, begda, endda
+        $records = $this->db->get_records_sql("SELECT distinct on (objid) objid, tabnr, tline, begda, endda
                                      FROM " . $table . "
-                                     WHERE objid = :kid AND peryr = :peryr AND perid = :perid ORDER BY tabnr, tabseqnr",
+                                     WHERE objid = :kid AND peryr = :peryr AND perid = :perid ORDER BY objid, tabnr, tabseqnr",
                                     $params);
         $title = "";
         $lines = array();
