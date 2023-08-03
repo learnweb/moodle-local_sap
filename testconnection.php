@@ -30,8 +30,18 @@ $context = context_system::instance();
 $teachername = optional_param('teachername', false, PARAM_TEXT);
 
 $controller = new \local_sap\sapdb_controller();
-global $OUTPUT;
+$pagetitle = get_string('testconnection', 'local_sap');
+$url = new \moodle_url("/local/sap/testconnection.php");
 
+global $OUTPUT, $PAGE;
+
+$PAGE->set_context($context);
+$PAGE->set_url($url);
+$PAGE->set_title($pagetitle);
+$PAGE->set_heading($pagetitle);
+$PAGE->set_pagelayout('admin');
+
+$OUTPUT->heading($pagetitle);
 $OUTPUT->header();
 if (!empty($teachername)) {
     echo html_writer::tag('h2', 'Get teachers course list of ' . $teachername);

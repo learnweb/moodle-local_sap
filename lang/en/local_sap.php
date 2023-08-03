@@ -44,3 +44,5 @@ $string['defaultcategory'] = 'Default category';
 $string['remote_creation'] = 'Remote course creation';
 $string['remote_creation_desc'] = 'Allow everyone to request courses in the name of a teacher, who than has to confirm';
 
+// Testing Page.
+$string['testconnection'] = 'Test Page for Connection and Data';
