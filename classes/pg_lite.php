@@ -34,8 +34,17 @@ namespace local_sap;
  */
 class pg_lite {
 
+    /**
+     * @var null
+     */
     public $connection = null;
 
+    /**
+     * Connect to postgres DB.
+     *
+     * @return bool|string
+     * @throws \dml_exception
+     */
     public function connect() {
 
         $config = "host='" . get_config('local_sap', 'dbhost') . "' port ='" .
@@ -47,9 +56,15 @@ class pg_lite {
         $dberr = ob_get_contents();
         ob_end_clean();
         echo $dberr;
-        return ((pg_connection_status($this->connection) === false) || (pg_connection_status($this->connection) === PGSQL_CONNECTION_BAD))?$dberr:true;
+        return ((pg_connection_status($this->connection) === false) ||
+            (pg_connection_status($this->connection) === PGSQL_CONNECTION_BAD)) ? $dberr : true;
     }
 
+    /**
+     * Cut connection of Postgres DB.
+     *
+     * @return void
+     */
     public function dispose() {
         if ($this->connection) {
             pg_close($this->connection);

@@ -32,10 +32,20 @@ namespace local_sap;
  * @copyright   2023 Uni Münster
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class sapdb {
 
+    /**
+     * @var
+     */
     private static $instance;
+
+    /**
+     * Get a moodledatabase based connection to sap db.
+     *
+     * @return \moodle_database|null
+     * @throws \dml_connection_exception
+     * @throws \dml_exception
+     */
     public static function get() {
         if (!self::$instance) {
             self::$instance = \moodle_database::get_driver_instance('pgsql', 'native', true);
@@ -50,6 +60,10 @@ class sapdb {
         return self::$instance;
     }
 
+    /**
+     * Destroy a connection to a SAP DB connection.
+     * @return void
+     */
     public static function destroy() {
         self::$instance->close();
     }

@@ -19,11 +19,9 @@
  *
  * @package     local_sap
  * @category    upgrade
- * @copyright   2023 Uni Münster 
+ * @copyright   2023 Uni Münster
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Execute local_sap upgrade from the given old version.

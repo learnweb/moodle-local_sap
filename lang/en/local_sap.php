@@ -19,7 +19,7 @@
  *
  * @package     local_sap
  * @category    string
- * @copyright   2023 Uni Münster 
+ * @copyright   2023 Uni Münster
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -18,7 +18,7 @@
  * Plugin administration pages are defined here.
  *
  * @package     local_sap
- * @copyright   2023 Uni Münster 
+ * @copyright   2023 Uni Münster
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
