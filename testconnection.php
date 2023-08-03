@@ -49,7 +49,7 @@ if ($teachername) {
     echo html_writer::tag('h2', ' teachers mail ' . $controller->username_to_mail($teachername));
     $courses = $controller->get_teachers_course_list($teachername);
     echo html_writer::tag('h2', 'Get teachers course list of ' . $teachername);
-    echo json_encode($courses);
+    echo ($courses);
     echo html_writer::tag('h2', 'Is course with id 2 Course of teacher: ' . $teachername);
     echo json_encode($controller->is_course_of_teacher('2', $teachername));
     if (!empty($courses)) {

@@ -98,7 +98,7 @@ class sapdb_controller {
      * @return mixed
      */
     public function get_course_by_veranstid(int $veranstid): mixed {
-        $result = get_courses_by_veranstids(array($veranstid));
+        $result = $this->get_courses_by_veranstids(array($veranstid));
         return $result[$veranstid];
     }
 
@@ -259,7 +259,7 @@ class sapdb_controller {
      */
     public function get_default_fullname(stdClass $sapcourse): string {
         $personen = "";
-        foreach (get_teachers_of_course_sap($sapcourse->veranstid) as $person) {
+        foreach ($this->get_teachers_of_course($sapcourse->veranstid) as $person) {
             $personen .= ", " . trim($person->vorname) . " " . trim($person->nachname);
         }
         return (($sapcourse->titel) . " " . trim($sapcourse->semestertxt) . $personen);
