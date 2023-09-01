@@ -19,18 +19,17 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/formslib.php');
 class request_remote_form extends \moodleform {
-    public $mform;
 
-    function definition() {
-        $this->mform = $this->_form;
+    protected function definition() {
+        $mform = $this->_form;
 
         $courses = [
-                $this->mform->createElement('radio', 'courses', '', 'course1: einführung in die informatik', 31),
-                $this->mform->createElement('radio', 'courses', '', 'course2: einführung in die moodletechnik', 45),
-                $this->mform->createElement('radio', 'courses', '', 'course3: einführung in die mensapreise', 46)
+                $mform->createElement('radio', 'courses', '', 'course1: einführung in die informatik', 31),
+                $mform->createElement('radio', 'courses', '', 'course2: einführung in die moodletechnik', 45),
+                $mform->createElement('radio', 'courses', '', 'course3: einführung in die mensapreise', 46)
         ];
 
-        $this->mform->addGroup($courses, 'sap_courses', '', '<br/>', false);
+        $mform->addGroup($courses, 'sap_courses', '', '<br/>', false);
 
         $this->add_action_buttons(true, get_string('submit'));
     }

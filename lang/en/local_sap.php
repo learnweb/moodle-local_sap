@@ -19,7 +19,7 @@
  *
  * @package     local_sap
  * @category    string
- * @copyright   2023 Uni Münster 
+ * @copyright   2023 Uni Münster
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -49,6 +49,6 @@ Your request will be processed by the Learnweb Support as soon as possible.';
 $string['create_for_username'] = 'Please enter the username of the authorizing teacher:';
 $string['list_of_courses_for_teacher'] = 'This is the list of courses for user {$a}:';
 
-// Email strings
+// Email strings.
 $string['remote_request_email_title'] = 'Course Creation Request';
 $string['remote_request_email_content'] = 'The user "{$a->a}" ({$a->userurl}) requested to create the Learnweb-course "{$a->c}" in your name. Please confirm or deny the request on this website: {$a->requesturl}';
