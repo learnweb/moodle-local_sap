@@ -26,12 +26,33 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'SAP Course Application';
+
+// Strings for settings page.
+// Connection settings.
+$string['heading_connection_settings'] = 'Connection Settings';
+$string['dbhost'] = 'Host';
+$string['dbport'] = 'Port';
+$string['dbname'] = 'Name';
+$string['dbpass'] = 'Pass';
+$string['dbuser'] = 'User';
+
+// Import settings.
+$string['heading_import_settings'] = 'Import Settings';
+$string['max_import_age'] = 'Maximum age of courses that can be imported';
+$string['subcategories'] = 'Allow placement in subcategories';
+$string['defaultcategory'] = 'Default category';
+$string['remote_creation'] = 'Remote course creation';
+$string['remote_creation_desc'] = 'Allow everyone to request courses in the name of a teacher, who than has to confirm';
+
+// Testing Page.
+$string['testconnection'] = 'Test Page for Connection and Data';
+
+// Other strings.
 $string['sap_course_teacher'] = 'The course exists on the SAP platform and you are registered as a teacher for that course';
 $string['sap_course_authorized'] = 'The course exists on the SAP platform and you are authorized to create this course on behalf of  a registered teacher';
 $string['sap_course_none'] = 'None of the above apply and you are authorized to create this course in the Learnweb';
 $string['submitbutton'] = 'Submit';
 $string['mustselectone'] = 'Unknown parameter, please select exactly 1 option';
-
 
 // Strings of the course_form.php.
 $string['shortnamehint'] = 'Shortname must contain {$a} at the end';
