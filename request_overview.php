@@ -29,10 +29,11 @@ if ($fromform = $requestform->get_data()) {
     var_dump($fromform);
     switch ($fromform->request_option) {
         case request_form::OPTION_SAP_COURSE_TEACHER:
-            $newurl = new \moodle_url('/local/sap/request_course.php', array('courseid' =>  $fromform->courses));
+            $newurl = new \moodle_url('/local/sap/request_course.php', ['courseid' => $fromform->courses]);
             break;
         case request_form::OPTION_SAP_COURSE_AUTHORIZED:
-            $newurl = new \moodle_url('/local/sap/request_remote.php', array('username' => $fromform->username_group['create_for_username']));
+            $newurl = new \moodle_url('/local/sap/request_remote.php',
+                    ['username' => $fromform->username_group['create_for_username']]);
             break;
         case request_form::OPTION_SAP_COURSE_NONE:
             // TODO.

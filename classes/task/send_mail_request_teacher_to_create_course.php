@@ -53,7 +53,8 @@ class send_mail_request_teacher_to_create_course extends \core\task\adhoc_task {
         $user = $data->user;
 
         $params = new \stdClass();
-        $params->requesturl = (new \moodle_url('/local/sap/request_respond.php', ['answer' => 1, 'requestid' => $data->requestid]))->out(false);
+        $params->requesturl = (new \moodle_url('/local/sap/request_respond.php',
+                ['answer' => 1, 'requestid' => $data->requestid]))->out(false);
         $params->userurl = (new \moodle_url('/user/view.php', ['id' => $data->requesterid]))->out(false);
         $requestuser = \core_user::get_user($data->requesterid);
         // Expected params of $data->params are:

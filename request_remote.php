@@ -27,6 +27,7 @@ if ($requestform->is_cancelled()) {
     redirect(new moodle_url('/local/sap/request_overview.php'));
 } else if ($data = $requestform->get_data()) {
     // TODO send mails.
+    $thisisnotempty = true;
 }
 
 echo $OUTPUT->header();
