@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-use \local_sap\course_form;
+use local_sap\course_form;
 require_once(__DIR__ . '/../../config.php');
 // Site parameter.
 $courseid = required_param('courseid', PARAM_TEXT);

@@ -22,12 +22,17 @@ $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url('/local/sap/request_remote.php', ['username' => $username]);
 
-$requestform = new \local_sap\request_remote_form($PAGE->url);
+$courses = \local_sap\sapdb_controller::get()->get_teachers_course_list($username);
+
+$requestform = new \local_sap\request_remote_form($courses, $PAGE->url);
 if ($requestform->is_cancelled()) {
     redirect(new moodle_url('/local/sap/request_overview.php'));
 } else if ($data = $requestform->get_data()) {
-    // TODO send mails.
-    $thisisnotempty = true;
+    if (isset($courses[$data->course])) {
+        // TODO send mails.
+        $thisisnotempty = true;
+    }
+    var_dump($data);
 }
 
 echo $OUTPUT->header();

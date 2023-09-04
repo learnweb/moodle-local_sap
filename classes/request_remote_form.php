@@ -20,16 +20,20 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir . '/formslib.php');
 class request_remote_form extends \moodleform {
 
+    public function __construct(private array $courses, $action = null, $customdata = null, $method = 'post', $target = '',
+            $attributes = null, $editable = true, $ajaxformdata = null) {
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable, $ajaxformdata);
+
+    }
+
     protected function definition() {
         $mform = $this->_form;
 
-        $courses = [
-                $mform->createElement('radio', 'courses', '', 'course1: einführung in die informatik', 31),
-                $mform->createElement('radio', 'courses', '', 'course2: einführung in die moodletechnik', 45),
-                $mform->createElement('radio', 'courses', '', 'course3: einführung in die mensapreise', 46)
-        ];
-
-        $mform->addGroup($courses, 'sap_courses', '', '<br/>', false);
+        $radios = [];
+        foreach ($this->courses as $course) {
+            $radios[] = $mform->createElement('radio', 'course', '', $course->info, $course->id);
+        }
+        $mform->addGroup($radios, 'sap_courses', '', '<br/>', false);
 
         $this->add_action_buttons(true, get_string('submit'));
     }

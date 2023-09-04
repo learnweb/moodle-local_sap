@@ -68,7 +68,7 @@ $string['shortnameinvalid'] = 'Shortname is invalid (it must contain {$a} at the
 $string['info_nocourses'] = 'Please use the standard form to apply for course creation. (<a href="../../course/request.php">&rarr; Link</a>)
 Your request will be processed by the Learnweb Support as soon as possible.';
 $string['create_for_username'] = 'Please enter the username of the authorizing teacher:';
-$string['list_of_courses_for_teacher'] = 'This is the list of courses for user {$a}:';
+$string['list_of_courses_for_teacher'] = 'This is the list of courses for user "{$a}":';
 
 // Email strings.
 $string['remote_request_email_title'] = 'Course Creation Request';

@@ -29,7 +29,6 @@ require_admin();
 $context = context_system::instance();
 
 $teachername = optional_param('teachername', false, PARAM_TEXT);
-var_dump($teachername);
 $pagetitle = get_string('testconnection', 'local_sap');
 $url = new \moodle_url("/local/sap/testconnection.php");
 
@@ -39,17 +38,18 @@ $PAGE->set_context($context);
 $PAGE->set_url($url);
 $PAGE->set_title($pagetitle);
 $PAGE->set_heading($pagetitle);
-$PAGE->set_pagelayout('standard');
 
-$OUTPUT->heading($pagetitle);
-$OUTPUT->header();
+echo $OUTPUT->header();
+echo $OUTPUT->heading($pagetitle);
 if ($teachername) {
-    $controller = new \local_sap\sapdb_controller();
+    $controller = \local_sap\sapdb_controller::get();
+
+    echo html_writer::tag('pre', $controller->get_teachers_pid($teachername));
 
     echo html_writer::tag('h2', ' teachers mail ' . $controller->username_to_mail($teachername));
     $courses = $controller->get_teachers_course_list($teachername);
     echo html_writer::tag('h2', 'Get teachers course list of ' . $teachername);
-    echo ($courses);
+    echo htmlentities(json_encode($courses));
     echo html_writer::tag('h2', 'Is course with id 2 Course of teacher: ' . $teachername);
     echo json_encode($controller->is_course_of_teacher('2', $teachername));
     if (!empty($courses)) {
@@ -65,9 +65,9 @@ if ($teachername) {
         echo json_encode($controller->get_default_fullname($course));
         echo json_encode($controller->get_default_shortname($course, $long = false));
         echo html_writer::tag('h2', 'Summary default startdate of course: ' . array_key_first($courses));
-        echo json_encode($controller->get_default_summary($course));
+        echo htmlentities(json_encode($controller->get_default_summary($course)));
         echo json_encode($controller->get_default_startdate($course));
     }
 }
 
-$OUTPUT->footer();
+echo $OUTPUT->footer();

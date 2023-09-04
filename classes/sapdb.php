@@ -35,16 +35,14 @@ namespace local_sap;
 class sapdb {
 
     /**
-     * @var
+     * @var \moodle_database
      */
     private static $instance;
 
     /**
      * Get a moodledatabase based connection to sap db.
      *
-     * @return \moodle_database|null
-     * @throws \dml_connection_exception
-     * @throws \dml_exception
+     * @return \moodle_database
      */
     public static function get() {
         if (!self::$instance) {

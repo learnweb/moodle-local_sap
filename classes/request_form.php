@@ -19,12 +19,15 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/formslib.php');
 class request_form extends \moodleform {
-    public $option;
-    public $courseid;
-    public $courses;
     const OPTION_SAP_COURSE_TEACHER = 1;
     const OPTION_SAP_COURSE_AUTHORIZED = 2;
     const OPTION_SAP_COURSE_NONE = 3;
+
+    public function __construct(private array $courses, $action = null, $customdata = null, $method = 'post', $target = '',
+            $attributes = null, $editable = true, $ajaxformdata = null) {
+        parent::__construct($action, $customdata, $method, $target, $attributes, $editable, $ajaxformdata);
+    }
+
     protected function definition() {
 
         $mform = $this->_form;
@@ -36,7 +39,7 @@ class request_form extends \moodleform {
                                 get_string('sap_course_authorized', 'local_sap'), self::OPTION_SAP_COURSE_AUTHORIZED);
 
         $mform->addGroup([
-                $mform->createElement('html', get_string('create_for_username', 'local_sap')),
+                $mform->createElement('html', \html_writer::div(get_string('create_for_username', 'local_sap'), 'ml-4')),
                 $mform->createElement('text', 'create_for_username', '', ''),
         ], 'username_group');
         $mform->setType('username_group[create_for_username]', PARAM_ALPHANUMEXT);
@@ -47,23 +50,22 @@ class request_form extends \moodleform {
         $mform->setDefault('request_option', self::OPTION_SAP_COURSE_TEACHER);
 
         $mform->addGroup([
-                $mform->createElement('static', 'nocoursestext', '', get_string('info_nocourses', 'local_sap'))
+                $mform->createElement('static', 'nocoursestext', '',
+                        \html_writer::div(get_string('info_nocourses', 'local_sap'), 'ml-4'))
         ], 'nocoursestextgroup', '');
         $mform->hideIf('nocoursestextgroup', 'request_option', 'neq', self::OPTION_SAP_COURSE_NONE);
 
-        $mform->addElement('submit', 'submitbutton',
-                get_string('submitbutton', 'local_sap'));
+        $mform->addElement('submit', 'submitbutton', get_string('submitbutton', 'local_sap'));
     }
 
     private function show_courses() {
         $mform = $this->_form;
 
-        $this->courses = array();
-        $this->courses[] = $mform->createElement('radio', 'courses', '', 'course1: einführung in die informatik', 31);
-        $this->courses[] = $mform->createElement('radio', 'courses', '', 'course2: einführung in die moodletechnik', 45);
-        $this->courses[] = $mform->createElement('radio', 'courses', '', 'course3: einführung in die mensapreise', 46);
-
-        $mform->addGroup($this->courses, 'sap_courses', '', '<br/>', false);
+        $radios = [];
+        foreach ($this->courses as $course) {
+            $radios[] = $mform->createElement('radio', 'course', '', $course->info, $course->id, ['class' => 'ml-4']);
+        }
+        $mform->addGroup($radios, 'sap_courses', '', '<br/>', false);
 
         $mform->hideif('sap_courses', 'request_option', 'neq', self::OPTION_SAP_COURSE_TEACHER);
     }

@@ -18,25 +18,28 @@ use \local_sap\request_form;
 
 require_once(__DIR__ . '/../../config.php');
 
+global $PAGE, $USER, $OUTPUT;
+
 require_login();
 $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url('/local/sap/request_overview.php');
 
-$requestform = new request_form();
-if ($fromform = $requestform->get_data()) {
+$courses = \local_sap\sapdb_controller::get()->get_teachers_course_list($USER->username);
+
+$requestform = new request_form($courses);
+if ($formdata = $requestform->get_data()) {
     $newurl = $PAGE->url;
-    var_dump($fromform);
-    switch ($fromform->request_option) {
+    switch ($formdata->request_option) {
         case request_form::OPTION_SAP_COURSE_TEACHER:
-            $newurl = new \moodle_url('/local/sap/request_course.php', ['courseid' => $fromform->courses]);
+            $newurl = new moodle_url('/local/sap/request_course.php', ['courseid' => $formdata->course]);
             break;
         case request_form::OPTION_SAP_COURSE_AUTHORIZED:
-            $newurl = new \moodle_url('/local/sap/request_remote.php',
-                    ['username' => $fromform->username_group['create_for_username']]);
+            $newurl = new moodle_url('/local/sap/request_remote.php',
+                    ['username' => $formdata->username_group['create_for_username']]);
             break;
         case request_form::OPTION_SAP_COURSE_NONE:
-            // TODO.
+            $newurl = new moodle_url('/course/request.php');
             break;
     }
     redirect($newurl);
