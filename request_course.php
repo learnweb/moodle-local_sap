@@ -16,17 +16,33 @@
 
 use local_sap\course_form;
 require_once(__DIR__ . '/../../config.php');
-// Site parameter.
-$courseid = required_param('courseid', PARAM_TEXT);
-
+global $DB, $PAGE, $OUTPUT, $USER;
+$courseid = optional_param('courseid', null, PARAM_TEXT);
 
 require_login();
 $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_url(new \moodle_url('/local/sap/request_course.php', array('courseid' => $courseid)));
 
-$courseform = new course_form(null, array('sapid' => $courseid));
+if ($DB->record_exists('course', ['idnumber' => $courseid])) {
+    throw new coding_exception('Course already exists!');
+}
 
+$sapcontroller = \local_sap\sapdb_controller::get();
+$sapcourse = $sapcontroller->get_course_by_veranstid($courseid);
+
+if (!$sapcourse) {
+    throw new coding_exception('Course does not exist in SAP');
+}
+
+if (!\local_sap\sapdb_controller::get()->is_course_of_teacher($sapcourse, $USER->username)) {
+    $request = $DB->get_record('local_sap_courserequests', ['sapid' => $courseid]);
+    if (!$request || $request->requestuserid != $USER->id || $request->state != 3) {
+        throw new coding_exception('You have no permission to request this course!');
+    }
+}
+
+$courseform = new course_form(null, array('sapcourse' => $sapcourse));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading('');

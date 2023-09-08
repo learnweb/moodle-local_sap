@@ -31,7 +31,7 @@ class request_remote_form extends \moodleform {
 
         $radios = [];
         foreach ($this->courses as $course) {
-            $radios[] = $mform->createElement('radio', 'course', '', $course->info, $course->id);
+            $radios[] = $mform->createElement('radio', 'course', '', $course->get_title(), $course->id, ['class' => 'w-100']);
         }
         $mform->addGroup($radios, 'sap_courses', '', '<br/>', false);
 

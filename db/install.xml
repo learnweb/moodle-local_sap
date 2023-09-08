@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/sap/db" VERSION="20230908" COMMENT="XMLDB file for Moodle local/sap"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_sap_courserequests" COMMENT="List of courserequests">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sapid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Course id in SAP"/>
+        <FIELD NAME="requestuserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="responduserid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="state" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="0 = requested, 1 = accepted, 2 = denied, 3 = course created"/>
+        <FIELD NAME="timerequested" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timeresponded" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timefinished" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_requestuserid" TYPE="foreign" FIELDS="requestuserid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="fk_responduserid" TYPE="foreign" FIELDS="responduserid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="u_sapid" TYPE="unique" FIELDS="sapid"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

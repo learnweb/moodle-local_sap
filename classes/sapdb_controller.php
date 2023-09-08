@@ -24,6 +24,7 @@
 
 namespace local_sap;
 
+use local_sap\local\entity\sap_course;
 use stdClass;
 
 /**
@@ -89,51 +90,44 @@ class sapdb_controller {
     /**
      * Gets one course by its veranstid.
      *
-     * @param int $veranstid
-     * @return mixed
+     * @param string $veranstid
+     * @return sap_course|null
      */
-    public function get_course_by_veranstid(int $veranstid): mixed {
-        return $this->get_courses_by_veranstids([$veranstid])[$veranstid];
+    public function get_course_by_veranstid(string $veranstid): ?sap_course {
+        return $this->get_courses_by_veranstids([$veranstid])[$veranstid] ?? null;
     }
 
     /**
      * Gets multiple courses by an array of veranstid.
      *
-     * @param array $veranstids
-     * @return array of stdClasses
+     * @param string[] $veranstids
+     * @return sap_course[]
      */
     public function get_courses_by_veranstids(array $veranstids): array {
+        global $DB;
         if (empty($veranstids)) {
             return array();
         }
-        $veranstidsstring = implode(',', $veranstids);
-        $params = array('veranstidsstring' => $veranstidsstring,
-                'maximportage' => get_config('local_sap', 'max_import_age'));
+        list($insql, $params) = $DB->get_in_or_equal($veranstids, SQL_PARAMS_NAMED);
+        $params['maximportage'] = get_config('local_sap', 'max_import_age');
+
         $courses = $this->db->get_records_sql("
-            SELECT v.objid, v.stext, d.peryr, d.perid, d.category, v.tabnr, v.tabseqnr, v.tline
-            FROM " . self::SAP_VERANST_TITLE . " as v JOIN " . self::SAP_VERANST_DETAILS . " as d on v.objid = d.objid
-            WHERE v.objid in (:veranstidsstring)
-             AND (CURRENT_DATE - CAST(v.begda AS date)) < :maximportage
-             ORDER BY v.begda,v.tline;", $params);
+            SELECT DISTINCT ON (d.short, d.peryr, d.perid) d.short || '-' || d.peryr || '-' || d.perid as id,
+                    d.objid, d.short, d.peryr, d.perid, d.category, d.categoryt
+            FROM " . self::SAP_VERANST_DETAILS . " as d
+            WHERE (d.short || '-' || d.peryr || '-' || d.perid) $insql
+             AND (CURRENT_DATE - CAST(d.begda AS date)) < :maximportage
+             ORDER BY d.short, d.peryr, d.perid, d.begda;", $params);
+
         $resultlist = array();
         foreach ($courses as $course) {
-            $result = new stdClass();
-            $result->veranstid = $course->objid;
-            $result->peryr = $course->peryr;
-            $result->perid = $course->perid;
-            $result->semester = $course->peryr . $course->perid[-1];
-            if ($course->perid[-1] === "1") {
-                $semester = "SoSe";
-            } else if ($course->perid[-1] === "2") {
-                $semester = "WiSe";
-            }
-            $result->semestertxt = $semester . " " . $course->peryr;
-            $result->veranstaltungsart = $course->category;
-            // TODO klvl title - check.
-            $result->titel = $this->get_klvl_title($course->objid, $course->peryr, $course->perid, self::SAP_VERANST_TITLE);
-            // TODO $result->urlveranst = $course->urlveranst;.
-            // Might override object with same objid.
-            $resultlist[$course->objid] = $result;
+            $result = new sap_course(
+                    $course->objid,
+                    $course->short,
+                    $course->peryr,
+                    $course->perid
+            );
+            $resultlist[$result->id] = $result;
         }
 
         return $resultlist;
@@ -162,7 +156,7 @@ class sapdb_controller {
      * Get all courses of a teacher.
      *
      * @param string $username
-     * @return array
+     * @return sap_course[]
      */
     public function get_teachers_course_list(string $username): array {
         $courselist = array();
@@ -180,134 +174,109 @@ class sapdb_controller {
         ]);
 
         foreach ($veranst as $course) {
-            $result = new stdClass();
-            $result->veranstid = $course->objid;
-            $result->peryr = $course->peryr;
-            $result->perid = $course->perid;
-            $result->id = "$course->objid-$course->peryr-$course->perid";
-            $result->title = $this->get_klvl_title($course->objid, $course->peryr, $course->perid, self::SAP_VERANST_TITLE);
-            $url = $this->gen_url($course);
-            // TODO Check if works.
-            $result->info = $this->get_klvl_title($course->objid, $course->peryr, $course->perid, self::SAP_VERANST_TITLE) .
-                    " (" . ($course->perid == 1 ? "SoSe " : "WiSe ") . $course->peryr . ",
-                <a target='_blank' href=" . $url . "> Link - " . $course->objid . "</a>" . ")";
-            // TODO URL und Optional - beschreibung, früher shorttext oder so.
+            $result = new sap_course($course->objid, $course->short, $course->peryr, $course->perid);
             $courselist[$result->id] = $result;
         }
         return $courselist;
     }
 
     /**
-     * returns true if a idnumber/veranstid is assigned to a specific teacher
+     * returns true if a sap course is assigned to a specific teacher
      *
-     * @param int $veranstid idnumber/veranstid
+     * @param sap_course $course sap course
      * @param string $username the teachers username
      * @return bool course of teacher?
      */
-    public function is_course_of_teacher(int $veranstid, string $username): bool {
+    public function is_course_of_teacher(sap_course $course, string $username): bool {
         $pid = $this->get_teachers_pid($username);
-        return $this->db->record_exists(self::SAP_VER_PO, ['objid' => $veranstid, 'sapid' => $pid]);
+        return $this->db->record_exists(self::SAP_VER_PO,
+                ['objid' => $course->objid, 'peryr' => $course->peryr, 'perid' => $course->perid, 'sapid' => $pid]
+        );
     }
 
     /**
      * get_teachers_of_course returns the teacher objects of a course sorted by their relevance
      *
-     * @param int $veranstid idnumber/veranstid
+     * @param sap_course $course sap course
      * @return array $sortedresult sorted array of teacher objects
      */
-    private function get_teachers_of_course(int $veranstid): array {
-        $params = ['veranstid' => $veranstid];
-
-        $teacherids = $this->db->get_records_sql(
-                "SELECT DISTINCT sapid FROM " . self::SAP_VER_PO . " WHERE objid = :veranstid", $params);
-        $pidstring = "";
-        $pids = array();
-        foreach ($teacherids as $teacher) {
-            $pidstring .= (empty($pidstring) ? "" : ",") . $teacher->sapid;
-            $pids[] = $teacher->sapid;
-        }
-
-        if (empty($pids)) {
-            return array();
-        }
-        // Get personal info.
-        $result = array();
-        $params = array('pidstring' => $pidstring);
-        $teachersinfo = $this->db->get_records_sql(
-                "SELECT p.vorname, p.nachname, l.login, p.sapid " .
-                "FROM " . self::SAP_PERSONAL . " as p JOIN " .
-                self::SAP_PERSONAL_LOGIN . " as l on p.sapid = l.sapid " .
-                "WHERE p.sapid IN ( :pidstring)", $params);
-
-        foreach ($teachersinfo as $teacherinfo) {
-            $result[$teacherinfo->sapid] = $teacherinfo;
-        }
-        // Sort by relevance.
-        $sortedresult = array();
-        foreach ($pids as $pid) {
-            $sortedresult[] = $result[$pid];
-        }
-        return $sortedresult;
+    private function get_teachers_of_course(sap_course $course): array {
+        // TODO Try to sort by relevance.
+        return $this->db->get_records_sql("
+            SELECT DISTINCT ON (p.sapid) p.sapid, p.vorname, p.nachname, l.login FROM " . self::SAP_PERSONAL . " p
+            JOIN " . self::SAP_PERSONAL_LOGIN . " l ON p.sapid = l.sapid
+            WHERE p.sapid IN (
+                SELECT DISTINCT sapid FROM " . self::SAP_VER_PO . "
+                WHERE short = :short AND peryr = :peryr AND perid = :perid
+            )
+            ORDER BY p.sapid
+       ", ['short' => $course->short, 'peryr' => $course->peryr, 'perid' => $course->perid]);
     }
 
     /**
-     * Returns the default fullname according to a given veranstid.*
+     * Returns the default fullname according to a given sap course
      *
-     * @param stdClass $sapcourse idnumber/veranstid
+     * @param sap_course $sapcourse sap course
      * @return string
      */
-    public function get_default_fullname(stdClass $sapcourse): string {
+    public function get_default_fullname(sap_course $sapcourse): string {
         $personen = "";
-        foreach ($this->get_teachers_of_course($sapcourse->veranstid) as $person) {
+        foreach ($this->get_teachers_of_course($sapcourse) as $person) {
             $personen .= ", " . trim($person->vorname) . " " . trim($person->nachname);
         }
-        return (($sapcourse->titel) . " " . trim($sapcourse->semestertxt) . $personen);
+        return $sapcourse->get_title() . " " . $sapcourse->get_semester_text() . $personen;
     }
 
     /**
-     * Returns the default shortname according to a given SAP course.
+     * Returns the default shortname for a given SAP course.
      *
-     * @param stdClass $sapcourse
-     * @param bool $long
-     * @return String
+     * @param sap_course $sapcourse
+     * @return string
      */
-    public function get_default_shortname(stdClass $sapcourse, bool $long = false): string {
+    public function get_default_shortname(sap_course $sapcourse): string {
         global $DB;
-        $i = "";
-        foreach (explode(" ", $sapcourse->titel) as $word) {
-            $i .= strtoupper($word[0]) . (($long && !empty($word[1])) ? $word[1] : "");
+        // Using \p{L} for all unicode letters including ümläütṡ.
+        preg_match_all('/[\p{L}\d]+/u', $sapcourse->get_title(), $matches);
+
+        $end = "-" . $sapcourse->peryr . "_" . (int) $sapcourse->perid;
+
+        $shortname = '';
+
+        for ($longwords = 0; $longwords <= count($matches[0]); $longwords++) {
+            $shortname = '';
+            for ($i = 0; $i < count($matches[0]); $i++) {
+                $shortname .= mb_convert_case(mb_substr($matches[0][$i], 0, $longwords > $i ? 2 : 1), MB_CASE_TITLE);
+            }
+
+            $shortname .= $end;
+
+            if (!$DB->record_exists('course', ['shortname' => $shortname])) {
+                return $shortname;
+            }
         }
-        $name = utf8_encode($i . "-" . substr($sapcourse->semester, 0, 4) .
-                "_" . substr($sapcourse->semester, -1));
-        if (!$long && $DB->record_exists('course', array('shortname' => $name))) {
-            return $this->get_default_shortname($sapcourse, true);
-        }
-        return $name;
+
+        return $shortname;
     }
 
     /**
      * Returns the default summary according to a given SAP course.
      *
-     * @param stdClass $sapcourse
+     * @param sap_course $sapcourse
      * @return string $summary
      */
-    public function get_default_summary(stdClass $sapcourse): string {
-        $summary = '<p>' . $this->get_klvl_title($sapcourse->veranstid, $sapcourse->peryr, $sapcourse->perid,
-                        self::SAP_VERANST_KOMMENTAR) . '</p>'; // TODO why does the table change from VERANST to VERANST_KOMENTAR?
-        return $summary . '<p><a href="' . $this->gen_url($sapcourse) . '">Kurs in SAP</a></p>';
+    public function get_default_summary(sap_course $sapcourse): string {
+        return '<p>' . $sapcourse->get_desc() . '</p><p><a href="' .
+                $this->gen_url($sapcourse) . '">Kurs in SAP</a></p>';
     }
 
     /**
      * Returns the default startdate according to a given SAP course
      *
-     * @param stdClass $sapcourse
-     * @return false|int $startdate
+     * @param sap_course $sapcourse
+     * @return false|int
      */
-    public function get_default_startdate(stdClass $sapcourse): bool|int {
-        $semester = $sapcourse->semester . '';
-        $year = substr($semester, 0, 4);
-        $month = (substr($semester, -1) == "1") ? 4 : 10;
-        return mktime(0, 0, 0, $month, 1, $year);
+    public function get_default_startdate(sap_course $sapcourse): bool|int {
+        return mktime(0, 0, 0, $sapcourse->perid === '001' ? 4 : 10, 1, $sapcourse->peryr);
     }
 
     /**
@@ -343,21 +312,22 @@ class sapdb_controller {
     /**
      * Generates the Title to a given SAP course.
      *
-     * @param int $kid
+     * @param int $objid
      * @param string $peryr
      * @param string $perid
      * @param string $table
-     * @return string|null
+     * @return string
      */
-    private function get_klvl_title(int $objid, string $peryr, string $perid, string $table): ?string {
+    public function get_klvl_title(int $objid, string $peryr, string $perid, string $table): string {
         if (!in_array($table, [self::SAP_VERANST_TITLE, self::SAP_VERANST_KOMMENTAR])) {
             throw new \coding_exception('$table has to be ' . self::SAP_VERANST_TITLE . ' or ' . self::SAP_VERANST_KOMMENTAR);
         }
-        return trim($this->db->get_field_sql("SELECT string_agg(t.tline, '') FROM ( " .
+        $str = $this->db->get_field_sql("SELECT string_agg(t.tline, '') FROM ( " .
                 "   SELECT DISTINCT ON (tabseqnr) tabseqnr, tline " .
                 "   FROM $table " .
                 "   WHERE objid = :objid AND peryr = :peryr AND perid = :perid " .
                 "   ORDER BY tabseqnr " .
-                ") t", ['objid' => $objid, 'peryr' => $peryr, 'perid' => $perid]));
+                ") t", ['objid' => $objid, 'peryr' => $peryr, 'perid' => $perid]);
+        return $str ? trim($str) : '';
     }
 }

@@ -63,9 +63,10 @@ class request_form extends \moodleform {
 
         $radios = [];
         foreach ($this->courses as $course) {
-            $radios[] = $mform->createElement('radio', 'course', '', $course->info, $course->id, ['class' => 'ml-4']);
+            $radios[] = $mform->createElement('radio', 'course', '', $course->get_title(), $course->id,
+                    ['class' => 'ml-4 w-100 justify-content-start']);
         }
-        $mform->addGroup($radios, 'sap_courses', '', '<br/>', false);
+        $mform->addGroup($radios, 'sap_courses', '', '', false);
 
         $mform->hideif('sap_courses', 'request_option', 'neq', self::OPTION_SAP_COURSE_TEACHER);
     }
